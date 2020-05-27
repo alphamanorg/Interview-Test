@@ -2,12 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>ToDo Manager</title>
+    <title>Movie Rating</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
           integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
-    <script
-            src="https://code.jquery.com/jquery-3.5.1.min.js"
-            integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0="
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+            integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
             crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
             integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
@@ -54,30 +53,39 @@
              style="margin: auto; height:180px; padding-top:10px;  background-color: white; text-align: center">
             <div class="row">
                 <div class="col-lg-12">
-                    <h1>ToDo List</h1>
+                    <h1>Movie Ratings Service</h1>
                 </div>
 
             </div>
             <div class="row">
 
-                <div class="col-lg-8">
+                <div class="col-lg-4">
                     <div class="form-group">
-                        <label for="todoName">ToDo</label>
-                        <input type="text" class="form-control" maxlength="200" id="todoName"
-                               placeholder="Enter the ToDo">
+                        <label for="movieName">Movie Name</label>
+                        <input type="text" class="form-control" maxlength="50" id="movieName"
+                               placeholder="Enter the movie">
                     </div>
+                </div>
+
+                <div class="col-lg-4">
+
+                    <div class="form-group">
+                        <label for="ratings">Ratings</label>
+                        <input type="text" class="form-control" maxlength="1" id="ratings" placeholder="Rate 0 to 9">
+                    </div>
+
                 </div>
 
                 <div class="col-lg-2">
                     <div style="padding-top: 20px">
-                        <button type="button" class="btn btn-primary btn-lg" id="addButton">Add</button>
+                        <button type="button" class="btn btn-primary btn-lg" id="rateButton">Rate</button>
                     </div>
 
                 </div>
 
                 <div class="col-lg-2">
                     <div style="padding-top: 20px">
-                        <button type="button" class="btn btn-dark btn-lg" id="loadToDoButton">Load</button>
+                        <button type="button" class="btn btn-dark btn-lg" id="loadButton">Load</button>
                     </div>
 
                 </div>
@@ -89,22 +97,21 @@
     <div class="row">
 
         <div class="col-lg-6 align-middle tablediv" style="background-color: white; margin: auto; padding: 20px">
-            <table id="todotable" class="table" style="width:100%;">
+            <table id="movietable" class="table" style="width:100%;">
                 <thead>
                 <tr>
-                    <th>Status</th>
-                    <th>ToDo</th>
+                    <th>Movie Title</th>
+                    <th>Ratings</th>
                     <th>Delete</th>
                 </tr>
                 </thead>
                 <tbody>
 
-
                 </tbody>
                 <tfoot>
                 <tr>
-                    <th>Status</th>
-                    <th>ToDo</th>
+                    <th>Movie Title</th>
+                    <th>Ratings</th>
                     <th>Delete</th>
                 </tr>
                 </tfoot>
@@ -115,81 +122,33 @@
 
 </div>
 
+
 <script>
-    var todoTable;
-    var checkBox = '<input class=\"form-check-input\" style=\"text-align: center\" type=\"checkbox\" value=\"\" id=\"defaultCheck1\">';
-    var deleteButton = '<button type=\"button\" class=\"btn btn-danger deleteButton\">Delete</button>';
-
+    var movieTable;
     $(document).ready(function () {
+        //Initialization of DataTable objects
+        movieTable = $('#movietable').DataTable();
 
-        //Using JSON to load data
-        var jsonData = [
-            {
-                "todos": {
-                    "check": " <input class=\"form-check-input\" style=\"text-align: center\" type=\"checkbox\" value=\"\" id=\"defaultCheck1\">",
-                    "todo": "Go to office",
-                    "action": "<button type=\"button\" class=\"btn btn-danger deleteButton\">Delete</button>"
-                }
-            },
-            {
-                "todos": {
-                    "check": " <input class=\"form-check-input\" style=\"text-align: center\" type=\"checkbox\" value=\"\" id=\"defaultCheck1\">",
-                    "todo": "Finish important project",
-                    "action": "<button type=\"button\" class=\"btn btn-danger deleteButton\">Delete</button>"
-                }
-            }
-        ];
-
-        /*var data = $.getJSON( "https://jsonplaceholder.typicode.com/todos", function( data ) {
-            console.log(data);
+        //Setting up OnClick Listener for Delete row actions
+        $('#movietable').on('click', 'tbody tr', function () {
+            movieTable.row(this).remove().draw();
         });
-            todoTable = $('#todotable').DataTable({
-                "data" : data,
-                columns : [
-                    {"data" : checkBox},
-                    {"data" : "body"},
-                    {"data" : deleteButton}
-                ]
-            });*/
 
+        //Setting up OnClick Listener on Load Button
+        $('#loadButton').on('click', function () {
+            loadSampleData();
+        });
 
-        /*todoTable = $('#todotable').DataTable({
-            "ajax": {
-                "url": "todos.txt",
-                "dataSrc": "data"
-            },
-            "columns": [
-                {
-                    "data": null,
-                    "defaultContent": "Hy"
-                },
-                {"data": "task"},
-                {
-                    "data": null,
-                    "defaultContent": "Hy"
-                }
+        //Setting up OnClick Listener on Rate Button
+        $("#rateButton").click(function () {
+            var movieName = $("#movieName").val();
+            var ratings = $("#ratings").val();
 
-            ]
-
-            /!*"data": jsonData,
-            "columns": [
-                {"data": "todos.check"},
-                {"data": "todos.todo"},
-                {"data": "todos.action"}
-            ]*!/
-        });*/
-
-        todoTable = $('#todotable').DataTable();
-
-        //Add OnClick listener on Add button
-        $("#addButton").click(function () {
-            var todoName = $("#todoName").val();
-
-            if (todoName === '') {
-                alert('Please enter a valid todo');
-            } else {
-                var rowNode = todoTable
-                    .row.add(['<input class=\"form-check-input\" style=\"text-align: center\" type=\"checkbox\" value=\"\" id=\"defaultCheck1\">', todoName, '<button type=\"button\" class=\"btn btn-danger deleteButton\">Delete</button>'])
+            if(movieName === '' || ratings === ''){
+                alert('Please enter a movie');
+            }else {
+                var rowNode = movieTable
+                    .row.add([movieName, ratings, '<button type="button" class="btn btn-danger deleteButton">Delete</button>'])
                     .draw()
                     .node();
 
@@ -199,52 +158,27 @@
 
         });
 
-        //Setting up OnClick Listener for Delete row actions
-        $('#todotable').on('click', 'tbody tr', function () {
-            var rowNode = todoTable.row(this).draw().node();
-            $(rowNode)
-                .css( 'color', 'white' )
-                .css( 'background', '#42f572' )
-                .css( 'text-decoration', 'line-through' )
-                .animate({color: 'black'});
-
-        });
-
-        //Setting up OnClick Listener for Delete row actions
-        $('#deleteButton').on('click', function () {
-            todoTable.row(this).remove().draw();
-        });
-
-
-        //Setting up OnClick Listener on Load Button
-        $('#loadToDoButton').on('click', function () {
-            loadSampleData();
-        });
-
-
         //Add Sample data on reload
         loadSampleData();
-
 
     });
 
     //Function to load sample data to table
     function loadSampleData() {
-        var rowNode = todoTable
+        var rowNode = movieTable
             .clear()
-            .row.add(['<input class=\"form-check-input\" style=\"text-align: center\" type=\"checkbox\" value=\"\" id=\"defaultCheck1\">', "Make Breakfast" , '<button type=\"button\" class=\"btn btn-danger deleteButton\">Delete</button>'])
-            .row.add(['<input class=\"form-check-input\" style=\"text-align: center\" type=\"checkbox\" value=\"\" id=\"defaultCheck1\">', "Go to Office", '<button type=\"button\" class=\"btn btn-danger deleteButton\">Delete</button>'])
-            .row.add(['<input class=\"form-check-input\" style=\"text-align: center\" type=\"checkbox\" value=\"\" id=\"defaultCheck1\">', "Finish Project", '<button type=\"button\" class=\"btn btn-danger deleteButton\">Delete</button>'])
-            .row.add(['<input class=\"form-check-input\" style=\"text-align: center\" type=\"checkbox\" value=\"\" id=\"defaultCheck1\">', "Bake a cake", '<button type=\"button\" class=\"btn btn-danger deleteButton\">Delete</button>'])
-            .row.add(['<input class=\"form-check-input\" style=\"text-align: center\" type=\"checkbox\" value=\"\" id=\"defaultCheck1\">', "Pay bills", '<button type=\"button\" class=\"btn btn-danger deleteButton\">Delete</button>'])
+            .row.add(['Titanic', 9, '<button type="button" class="btn btn-danger deleteButton">Delete</button>'])
+            .row.add(['Bahubali', 9, '<button type="button" class="btn btn-danger deleteButton">Delete</button>'])
+            .row.add(['Avatar', 9, '<button type="button" class="btn btn-danger deleteButton">Delete</button>'])
+            .row.add(['Interstellar', 8, '<button type="button" class="btn btn-danger deleteButton">Delete</button>'])
+            .row.add(['Independence Day', 7, '<button type="button" class="btn btn-danger deleteButton">Delete</button>'])
+            .row.add(['Bad Boys', 6, '<button type="button" class="btn btn-danger deleteButton">Delete</button>'])
             .draw()
             .node();
 
         $(rowNode)
             .animate({color: 'black'});
     }
-
-
 
 </script>
 
